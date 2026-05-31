@@ -2,8 +2,8 @@
 
 A terminal-based AI programming assistant powered by Rust — ask coding questions and get instant answers right from your command line.
 
-<!-- TODO: Add a GIF/screenshot of a real session here -->
-<!-- Example: ![DragonFox IDE demo](assets/demo.gif) -->
+demo:
+![DragonFox IDE demo](assets/demo.png)
 
 ---
 
@@ -44,6 +44,10 @@ cargo run
 cargo build --release
 ./target/release/DragonFoxIDE
 ```
+
+# Demo
+![DragonFox IDE demo](https://github.com/cyberworrier8088/DragonFoxIDE/releases/tag/demo)
+
 
 ## How It Works
 
