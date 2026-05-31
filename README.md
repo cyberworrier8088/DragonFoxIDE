@@ -67,28 +67,16 @@ DragonFoxAI > You can reverse a string in Rust using ...
 DragonFox IDE is a modular Rust CLI app with four source files:
 
 | File | Purpose |
-|------|---------|
-| `main.rs` | Entry point — startup banner, API key prompt, chat loop |
-| `ai.rs` | Sends prompts to the AI API and prints responses |
-| `config.rs` | Handles secure (hidden) API key input via `rpassword` |
-| `input.rs` | Reads user input from stdin |
+
+| `main.rs`  Entry point — startup banner, API key prompt, chat loop 
+| `ai.rs`  Sends prompts to the AI API and prints responses 
+| `config.rs`  Handles secure (hidden) API key input via `rpassword` 
+| `input.rs`  Reads user input from stdin 
 
 The app connects to [Hack Club's free AI proxy](https://ai.hackclub.com/), which routes requests to the `nvidia/nemotron-3-nano-omni-30b-a3b-reasoning` model using the OpenAI-compatible chat completions format. HTTP requests are handled async through `reqwest` + `tokio`, so the UI stays responsive while waiting for AI responses.
 
 The release build is tuned for size: LTO, single codegen unit, symbol stripping, and `panic = "abort"` produce a compact standalone binary with no external runtime.
 
-## Project Structure
-
-```
-DragonFoxIDE/
-├── Cargo.toml       # Dependencies & release profile
-├── LICENSE          # MIT
-└── src/
-    ├── main.rs      # Entry point & chat loop
-    ├── ai.rs        # AI API integration
-    ├── config.rs    # Secure API key input
-    └── input.rs     # User input handling
-```
 
 ## Tech Stack
 
@@ -105,4 +93,4 @@ DragonFoxIDE/
 
 ---
 
-Made by imu :)
+Made by imuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu :)
