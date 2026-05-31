@@ -30,7 +30,7 @@ That's it. Enter your API key when prompted, then start asking questions.
 - **Rust** 1.85+ (edition 2024) — [install via rustup](https://rustup.rs/)
 - An API key for the [Hack Club AI proxy](https://ai.hackclub.com/)
 
-### Build & run
+### Build & run and demo
 
 ```bash
 # Clone the repo
@@ -43,23 +43,6 @@ cargo run
 # Or build an optimized release binary
 cargo build --release
 ./target/release/DragonFoxIDE
-```
-
-### Usage
-
-```
-DragonFox IDE :}
-
-Type ur question below
-This is a simple AI assistant.
-easy to use
-Todo: Fully functional IDE with AI integration
-Enter API key: ••••••••
-
-Ready! Type your questions below.
-
-You > How do I reverse a string in Rust?
-DragonFoxAI > You can reverse a string in Rust using ...
 ```
 
 ## How It Works
