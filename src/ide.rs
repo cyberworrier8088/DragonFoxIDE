@@ -24,8 +24,27 @@ struct MyIDE {
     tabs: Vec<String>,
     current_tab: usize,
 
-
     terminal_output: String,
+
+    search_text: String,
+    new_file_name: String,
+    delete_file_path: String,
+    rename_file_name: String,
+    new_folder_name: String,
+}
+
+fn read_files(folder: &str, files: &mut Vec<String>) {
+    if let Ok(entries) = fs::read_dir(folder) {
+        for entry in entries.flatten() {
+            let path = entry.path();
+
+            if path.is_file() {
+                files.push(path.to_string_lossy().to_string());
+            } else if path.is_dir() {
+                read_files(&path.to_string_lossy(), files);
+            }
+        }
+    }
 }
 
 impl eframe::App for MyIDE {
@@ -38,35 +57,127 @@ impl eframe::App for MyIDE {
         });
 
         egui::SidePanel::left("explorer").show(ctx, |ui| {
+
             
             ui.heading("Explorer");
+
+            ui.label("Search");
+            ui.text_edit_singleline(&mut self.search_text);
 
             // Native folder picker button
             if ui.button("📁 Open Folder").clicked() {
                 if let Some(path) = FileDialog::new().pick_folder() {
                     self.folder_path = path.to_string_lossy().to_string();
                     self.files.clear();
-                    
-                    if let Ok(entries) = fs::read_dir(&self.folder_path) {
-                        for entry in entries.flatten() {
-                            let path = entry.path();
-                            if path.is_file() {
-                                self.files.push(path.to_string_lossy().to_string());
-                            }
+                    read_files(&self.folder_path, &mut self.files);
+                }
+            }
+
+            if ui.button("📄 New File").clicked() {
+                self.output = "Create file feature coming soon".to_string();
+            }
+
+            ui.separator();
+            ui.label("New File:");
+            ui.text_edit_singleline(&mut self.new_file_name);
+
+            if ui.button("Create").clicked() {
+                if !self.folder_path.is_empty() && !self.new_file_name.is_empty() {
+                    let path = format!(
+                        "{}/{}",
+                        self.folder_path,
+                        self.new_file_name
+                    );
+
+                    match fs::write(&path, "") {
+                        Ok(_) => {
+                            self.output = format!("Created {}", self.new_file_name);
+                            self.files.push(path);
+                            self.new_file_name.clear();
+                        }
+                        Err(e) => {
+                            self.output = e.to_string();
                         }
                     }
                 }
             }
 
             ui.separator();
+            ui.label("New Folder:");
+            ui.text_edit_singleline(&mut self.new_folder_name);
+
+            if ui.button("📁 Create Folder").clicked() {
+                if !self.folder_path.is_empty() && !self.new_folder_name.is_empty() {
+                    let path = format!(
+                        "{}/{}",
+                        self.folder_path,
+                        self.new_folder_name
+                    );
+
+                    match fs::create_dir_all(&path) {
+                        Ok(_) => {
+                            self.output = format!("Created folder {}", self.new_folder_name);
+                            self.new_folder_name.clear();
+                        }
+                        Err(e) => {
+                            self.output = e.to_string();
+                        }
+                    }
+                }
+            }
+
+            ui.separator();
+            ui.label("Rename File:");
+            ui.text_edit_singleline(&mut self.rename_file_name);
+
+            if ui.button("✏ Rename").clicked() {
+                if !self.file_path.is_empty() && !self.rename_file_name.is_empty() {
+                    let parent = std::path::Path::new(&self.file_path)
+                        .parent()
+                        .map(|p| p.to_string_lossy().to_string())
+                        .unwrap_or_default();
+                    let new_path = format!("{}/{}", parent, self.rename_file_name);
+
+                    match fs::rename(&self.file_path, &new_path) {
+                        Ok(_) => {
+                            self.output = format!(
+                                "Renamed {} to {}",
+                                self.file_path, self.rename_file_name
+                            );
+
+                            // Update tabs
+                            if let Some(pos) = self.tabs.iter().position(|t| t == &self.file_path) {
+                                self.tabs[pos] = new_path.clone();
+                            }
+
+                            self.file_path = new_path;
+                            self.rename_file_name.clear();
+
+                            // Refresh file list
+                            self.files.clear();
+                            read_files(&self.folder_path, &mut self.files);
+                        }
+                        Err(e) => {
+                            self.output = e.to_string();
+                        }
+                    }
+                }
+            }
             
             // Render files list
             for file_path in self.files.clone() {
-                let path = std::path::Path::new(&file_path);
-                let name = path.file_name().unwrap_or_default().to_string_lossy();
+                if !self.search_text.is_empty() && !file_path.to_lowercase().contains(&self.search_text.to_lowercase())
+                {
+                    continue;
+                }
+
+                let name = file_path
+                    .replace(&self.folder_path, "")
+                    .replace("\\", "/");
                 
                 if ui.button(format!("📄 {}", name)).clicked() {
                     self.file_path = file_path.clone();
+                    self.delete_file_path = file_path.clone();
                     
                     if !self.tabs.contains(&file_path) {
                         self.tabs.push(file_path.clone());
@@ -134,19 +245,90 @@ impl eframe::App for MyIDE {
                         Err(e) => self.output = format!("Error: {}", e),
                     }
                 }
+
+                if ui.button("Delete").clicked() {
+                    if !self.file_path.is_empty() {
+                        match fs::remove_file(&self.file_path) {
+                            Ok(_) => {
+                                self.output =
+                                    format!("Deleted {}", self.file_path);
+
+                                self.files.clear();
+                                read_files(
+                                    &self.folder_path,
+                                    &mut self.files
+                                );
+
+                                self.code.clear();
+                                self.file_path.clear();
+                            }
+                            Err(e) => {
+                                self.output = e.to_string();
+                            }
+                        }
+                    }
+                }
+
+                if ui.button("Cargo Build").clicked() {
+                    if !self.folder_path.is_empty() {
+                        match Command::new("cargo")
+                            .arg("build")
+                            .current_dir(&self.folder_path)
+                            .output()
+                        {
+                            Ok(out) => {
+                                self.terminal_output =
+                                    String::from_utf8_lossy(&out.stderr).to_string();
+
+                                if self.terminal_output.is_empty() {
+                                    self.terminal_output =
+                                        String::from_utf8_lossy(&out.stdout).to_string();
+                                }
+                            }
+                            Err(e) => {
+                                self.terminal_output = e.to_string();
+                            }
+                        }
+                    }
+                }
+
+                if ui.button("Cargo Run").clicked() {
+                    if !self.folder_path.is_empty() {
+                        match Command::new("cargo")
+                            .arg("run")
+                            .current_dir(&self.folder_path)
+                            .output()
+                        {
+                            Ok(out) => {
+                                self.terminal_output =
+                                    String::from_utf8_lossy(&out.stderr).to_string();
+
+                                if self.terminal_output.is_empty() {
+                                    self.terminal_output =
+                                        String::from_utf8_lossy(&out.stdout).to_string();
+                                }
+                            }
+                            Err(e) => {
+                                self.terminal_output = e.to_string();
+                            }
+                        }
+                    }
+                }
             });
 
             ui.separator();
-            if ui.button("Cargo Check").clicked() {
-                match Command::new("cargo").arg("check").output() {
-                    Ok(out) => {
-                        self.terminal_output = String::from_utf8_lossy(&out.stdout).to_string();
-                    }
-                    Err(e) => {
-                        self.terminal_output = e.to_string();
-                    }
-                }
-}
-        });
+                ui.label("Output:");
+                ui.add(
+                    egui::TextEdit::multiline(&mut self.output)
+                        .desired_rows(3)
+                );
+
+                ui.separator();
+                ui.label("Terminal:");
+                ui.add(
+                    egui::TextEdit::multiline(&mut self.terminal_output)
+                        .desired_rows(10)
+                );
+            });
     }
 }

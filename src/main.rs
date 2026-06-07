@@ -1,5 +1,5 @@
 mod ide;
 
 fn main() {
-    ide::ide();
+    let _ = ide::ide();
 }
