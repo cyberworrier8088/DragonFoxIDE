@@ -1,83 +1,71 @@
 # DragonFox IDE
 
-A terminal-based AI programming assistant powered by Rust — ask coding questions and get instant answers right from your command line.
+DragonFox IDE is a lightweight VS Code-inspired desktop editor built with Rust, egui, and eframe. It combines a file explorer, tabbed code editor, terminal, cargo build/run actions, diagnostics, global search, symbol outline, and an AI assistant in one compact native app.
 
-demo:
 ![DragonFox IDE demo](assets/demo.png)
 
----
+## Features
+
+- VS Code-like layout with activity bar, explorer, search, outline, AI, settings, editor tabs, bottom panel, and status bar
+- Syntax-highlighted code editor for Rust-style code, with tabs and unsaved-change indicators
+- Workspace explorer with file filtering, create file/folder, rename, delete, and refresh behavior
+- Global search across the open workspace
+- Symbol outline for Rust, Python, JavaScript, and TypeScript files
+- Go To Definition from `F12`, the toolbar, the command palette, the editor context menu, or the Outline panel
+- Prefix-matched Rust autocomplete for keywords, macros, standard types, snippets, and local outline symbols
+- Lightweight Rust hover information for common language items such as `Vec`, `String`, `Option`, `Result`, and print macros
+- Integrated terminal command runner
+- Cargo build/run buttons with background execution
+- Problems panel populated from cargo warnings and errors
+- AI assistant with Ask, Explain, Fix, Refactor, apply-code-block, and copy-code-block actions
+- Cursor-style AI context buttons for current file, selected code, terminal output, and project-wide workspace context
+- Inline AI editing with Improve Code, Generate Function, and `Ctrl+K`
+- Error-aware AI flow with Fix Build Errors from parsed cargo diagnostics
+- Source Control panel with Git status, add all, and commit
+- Right-click AI code actions for explain, improve, add comments, refactor, and generate tests
+- Command palette with `Ctrl+P`, quick save with `Ctrl+S`, and run with `F5`
 
 ## Quick Start
 
 ```bash
-cargo run --release
+cargo run
 ```
 
-That's it. Enter your API key when prompted, then start asking questions.
-
-## Features
-
-- **AI-powered chat** — ask programming questions and get detailed answers in your terminal
-- **Secure API key input** — your key is hidden while typing (no shoulder-surfing)
-- **Lightweight & fast** — single binary, no runtime dependencies, no config files needed
-- **Optimized builds** — release profile tuned with LTO, symbol stripping, and size optimization
-- **Built in Rust** — safe, fast, and zero garbage collection pauses
-
-## How to Run Locally
-
-### Requirements
-
-- **Rust** 1.85+ (edition 2024) — [install via rustup](https://rustup.rs/)
-- An API key for the [Hack Club AI proxy](https://ai.hackclub.com/)
-
-### Build & run and demo
+For an optimized binary:
 
 ```bash
-# Clone the repo
-git clone https://github.com/cyberworrier8088/DragonFoxIDE.git
-cd DragonFoxIDE
-
-# Run (debug build — fast compile)
-cargo run
-
-# Or build an optimized release binary
 cargo build --release
-./target/release/DragonFoxIDE
 ```
 
-# Demo
-![DragonFox IDE demo](https://github.com/cyberworrier8088/DragonFoxIDE/releases/tag/demo)
+## AI Setup
 
+Open Settings inside DragonFox IDE and paste your Hack Club AI proxy API key. The app does not ship with a hard-coded key.
 
-## How It Works
+The AI panel sends the active file, selected language, workspace path, and terminal output as context for Explain, Fix, and Refactor actions.
 
-DragonFox IDE is a modular Rust CLI app with four source files:
+You can also pin extra context with:
+
+- `Add Current File`
+- `Add Selected Code`
+- `Add Terminal Output`
+- `Project-Wide AI`
+
+Inline AI edits can directly replace the active editor buffer, so review the changed tab and save when it looks right.
+
+## Project Layout
 
 | File | Purpose |
+| --- | --- |
+| `src/main.rs` | App entry point |
+| `src/ide.rs` | Desktop IDE UI, workspace actions, terminal, diagnostics, and AI integration |
+| `src/highlighter.rs` | Lightweight syntax highlighter |
+| `assets/demo.png` | Demo image |
 
-| `main.rs`  Entry point — startup banner, API key prompt, chat loop 
-| `ai.rs`  Sends prompts to the AI API and prints responses 
-| `config.rs`  Handles secure (hidden) API key input via `rpassword` 
-| `input.rs`  Reads user input from stdin 
+## Requirements
 
-The app connects to [Hack Club's free AI proxy](https://ai.hackclub.com/), which routes requests to the `nvidia/nemotron-3-nano-omni-30b-a3b-reasoning` model using the OpenAI-compatible chat completions format. HTTP requests are handled async through `reqwest` + `tokio`, so the UI stays responsive while waiting for AI responses.
-
-The release build is tuned for size: LTO, single codegen unit, symbol stripping, and `panic = "abort"` produce a compact standalone binary with no external runtime.
-
-
-## Tech Stack
-
-- **Language:** Rust (edition 2024)
-- **Async runtime:** Tokio
-- **HTTP client:** Reqwest
-- **JSON:** Serde + serde_json
-- **Secure input:** rpassword
-- **AI model:** NVIDIA Nemotron via Hack Club proxy
+- Rust 1.85+
+- A Hack Club AI proxy API key for AI assistant features
 
 ## License
 
-[MIT](LICENSE) © cyberworrier8088
-
----
-
-Made by imuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu :)
+[MIT](LICENSE)
